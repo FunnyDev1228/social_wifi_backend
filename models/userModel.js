@@ -28,9 +28,16 @@ const userSchema = new mongoose.Schema(
       // required: false,
     },
 
-    // location: {
-
-    // },
+    location: {
+      lat: {
+        type: Number,
+        // required: true
+      },
+      lon: {
+        type: Number,
+        // required: true
+      },
+    },
 
     email: {
       type: String,

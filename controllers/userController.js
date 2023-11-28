@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
+import geolib from "geolib";
 
 //@desc     Auth User & Get Token
 //@route    POST api/users/login
@@ -38,6 +39,7 @@ const register = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User already Exist");
   }
+  const location = { lat: "", lon: "" };
 
   const user = await User.create({
     username,
@@ -46,6 +48,7 @@ const register = asyncHandler(async (req, res) => {
     facebook,
     snapchat,
     email,
+    location,
     password,
   });
 
@@ -101,18 +104,32 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 //
 const searchUsers = asyncHandler(async (req, res) => {
-  console.log("#$#$#$", req.body.location);
+  console.log("#$#$#$", req.body);
   const userLocation = req.body.location;
-  const nearbyUsers = await User.find(); // Fetch all users
-  const usersWithinRadius = nearbyUsers.filter((user) => {
-    const distance = geolib.getDistance(
-      { latitude: user.location.lat, longitude: user.location.lon },
-      { latitude: userLocation.lat, longitude: userLocation.lon }
-    );
-    return distance <= 50; // or any other logic for determining "nearby"
-  });
-  console.log("#########", usersWithinRadius);
-  res.json(usersWithinRadius);
+  const email = req.body.email;
+  console.log("#$#$#----------", userLocation);
+  const user = await User.findOne({ email });
+  if (user) {
+    user.location = userLocation;
+    const updatedUser = await user.save();
+    const nearbyUsers = await User.find(); // Fetch all users
+    const usersWithinRadius = nearbyUsers.filter((user) => {
+      if (user.email != email && user.location && userLocation) {
+        const distance = geolib.getDistance(
+          { latitude: user.location.lat, longitude: user.location.lon },
+          { latitude: userLocation.lat, longitude: userLocation.lon }
+        );
+        return distance <= 50;
+      } else {
+        return false;
+      }
+    });
+    console.log("#########", usersWithinRadius);
+    res.json(usersWithinRadius);
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
 });
 
 export { login, register, getUsers, updateUserProfile, searchUsers };
