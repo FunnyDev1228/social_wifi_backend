@@ -7,7 +7,6 @@ import geolib from "geolib";
 //@route    POST api/users/login
 //@access   Public
 const login = asyncHandler(async (req, res) => {
-  console.log("$$$$$$$$$$", req.body);
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -30,7 +29,6 @@ const login = asyncHandler(async (req, res) => {
 //@route    POST api/users/register
 //@access   Public
 const register = asyncHandler(async (req, res) => {
-  console.log("%%%%%%", req.body);
   const { username, tictok, instagram, facebook, snapchat, email, password } =
     req.body;
   const userExist = await User.findOne({ email });
@@ -104,7 +102,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 //
 const searchUsers = asyncHandler(async (req, res) => {
-  console.log("#$#$#$", req.body);
   const userLocation = req.body.location;
   const email = req.body.email;
   console.log("#$#$#----------", userLocation);
